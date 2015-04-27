@@ -11,13 +11,16 @@
 #include <memory>
 #include "Downloader.h"
 #include "Response.h"
-using namespace std;
-typedef unique_ptr<LinkFinder> linkFinderPtr;
+#include "LinkFinder.h"
+#include "HrefLinkFinder.h"
+#include "InternetLinkReplacer.h"
+
+typedef std::unique_ptr<LinkFinder> linkFinderPtr;
 
 struct DFile {
     std::string url;
     int depth;
-    DFile(const string& url, int depth) : url(url), depth(depth) {}
+    DFile(const std::string& url, int depth) : url(url), depth(depth) {}
 };
 
 class Scraper {
@@ -28,11 +31,12 @@ class Scraper {
 public:
     Scraper() : fileNum(0) {
         linkFinders = {
-                linkFinderPtr(new HrefLinkFinder(new DownloadLinkReplacer(this, true))),
-                linkFinderPtr(new CSSLinkFinder(new DownloadLinkReplacer(this, false))),
-                linkFinderPtr(new JSLinkFinder(new DownloadLinkReplacer(this, false))),
-                linkFinderPtr(new ImageLinkFinder(new InternetLinkReplacer(this))),
-                linkFinderPtr(new OtherLinkFinder(new DownloadLinkReplacer(this, false))),
+                linkFinderPtr(new HrefLinkFinder(new InternetLinkReplacer(this))),
+//                linkFinderPtr(new HrefLinkFinder(new DownloadLinkReplacer(this, true))),
+//                linkFinderPtr(new CSSLinkFinder(new DownloadLinkReplacer(this, false))),
+//                linkFinderPtr(new JSLinkFinder(new DownloadLinkReplacer(this, false))),
+//                linkFinderPtr(new ImageLinkFinder(new InternetLinkReplacer(this))),
+//                linkFinderPtr(new OtherLinkFinder(new DownloadLinkReplacer(this, false))),
         };
     }
 
@@ -40,7 +44,8 @@ public:
         Downloader downloader(url);
         Response page = downloader.download(url);
         for (auto &linkFinder : linkFinders)
-            linkFinder.enqueue(page, depth);
+            linkFinder->find(page, depth);
+        page.writeFile(downloaded[url]);
 
         if (toDownload.size()) {
             DFile next = toDownload.front();
@@ -49,10 +54,10 @@ public:
         }
     }
 
-    std::string enqueueDownload(const std::string& url, int depth) {
+    std::string enqueueDownload(const std::string& url, const std::string& suffix, int depth) {
         if (!downloaded.count(url)) {
             toDownload.push_back(DFile(url, depth));
-            downloaded[url] = "file" + fileNum++ + getSuffix(url);
+            downloaded[url] = "files/file" + fileNum++ + suffix;
         }
         return downloaded[url];
     }

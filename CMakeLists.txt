@@ -4,4 +4,4 @@ project(semestralka)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILES main.cpp)
-add_executable(semestralka ${SOURCE_FILES} Downloader.cpp Downloader.h Response.cpp Response.h Scraper.cpp Scraper.h)
+add_executable(semestralka ${SOURCE_FILES} Downloader.cpp Downloader.h Response.cpp Response.h Scraper.cpp Scraper.h LinkFinder.cpp LinkFinder.h HrefLinkFinder.cpp HrefLinkFinder.h LinkReplacer.h InternetLinkReplacer.cpp InternetLinkReplacer.h)
