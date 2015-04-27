@@ -5,6 +5,8 @@
 #include "HrefLinkFinder.h"
 using namespace std;
 
+HrefLinkFinder::HrefLinkFinder(LinkReplacer *linkReplacer) : LinkFinder(linkReplacer) { }
+
 void HrefLinkFinder::find(Response &response, int depth) {
     size_t startpos = 0;
     while((startpos = response.content.find("<a", startpos)) != std::string::npos){

@@ -12,7 +12,6 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <iostream>
-#include <regex>
 
 using namespace std;
 
@@ -90,7 +89,7 @@ Response Downloader::download(string url) {
 	sock = prepareSock(server.c_str(), 80);
 	if (sock == -1) {
 		cout << "socket error" << endl;
-		return Response("", verbose);
+		return Response("", server, verbose);
 	}
 
 	url = parseUrl(url);

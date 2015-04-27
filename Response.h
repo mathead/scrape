@@ -18,7 +18,7 @@ public:
     std::map<std::string, std::string> headers;
     std::string content, server;
 
-    Response(const std::string& response, bool verbose = false);
+    Response(const std::string& response, const std::string& server, bool verbose = false);
     void writeFile(const std::string& path);
 };
 

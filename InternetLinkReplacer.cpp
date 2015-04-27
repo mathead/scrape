@@ -5,6 +5,8 @@
 #include "InternetLinkReplacer.h"
 using namespace std;
 
+InternetLinkReplacer::InternetLinkReplacer(Scraper *scraper) : LinkReplacer(scraper) { }
+
 string InternetLinkReplacer::replace(const string &str, const Response& response) {
     if (str.length() <= 1)
         return str;

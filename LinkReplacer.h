@@ -6,15 +6,16 @@
 #define SEMESTRALKA_LINKREPLACER_H
 
 #include <string>
-#include "Scraper.h"
 #include "Response.h"
+
+class Scraper;
 
 class LinkReplacer {
 protected:
     Scraper* scraper;
 public:
-    LinkReplacer(Scraper* scraper) : scraper(scraper) {}
-    virtual ~LinkReplacer() {}
+    LinkReplacer(Scraper* scraper);
+    virtual ~LinkReplacer();
     virtual std::string replace(const std::string& str, const Response& response) = 0;
 };
 

@@ -10,9 +10,8 @@
 #include "LinkReplacer.h"
 
 class HrefLinkFinder : public LinkFinder {
-
 public:
-    HrefLinkFinder(LinkReplacer *linkReplacer) : LinkFinder(linkReplacer) { }
+    HrefLinkFinder(LinkReplacer *linkReplacer);
     virtual void find(Response& response, int depth);
 };
 

@@ -3,3 +3,7 @@
 //
 
 #include "LinkFinder.h"
+
+LinkFinder::LinkFinder(LinkReplacer* linkReplacer) : linkReplacer(linkReplacer) {}
+
+LinkFinder::~LinkFinder() { delete linkReplacer; }
