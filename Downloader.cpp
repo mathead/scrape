@@ -18,13 +18,13 @@ using namespace std;
 
 
 Downloader::Downloader(string server, bool verbose) : server(server), verbose(verbose) {
-    sock = prepareSock(server.c_str(), 80);
-    if (sock == -1)
-        cout << "socket error";
+    // sock = prepareSock(server.c_str(), 80);
+    // if (sock == -1)
+    //     cout << "socket error";
 }
 
 Downloader::~Downloader() {
-    close(sock);
+    // close(sock);
 }
 
 int Downloader::prepareSock(const char *listenAddr, int port) {
@@ -60,16 +60,17 @@ string Downloader::receive() {
 
     string ret;
     while (1) {
-        char buffer[100];
+        char buffer[1024];
         // the reply may be long - we read it in a loop
         int l = recv(sock, buffer, sizeof(buffer) - 1, 0);
         // l < 0 -> error, l == 0 -> finished
+        cout << "yoyoyoyoyo" << l << endl;
         if (l <= 0) return ret;
         buffer[l] = 0;
         ret += buffer;
 
         // if EOF -> return
-        if ((unsigned int) l < sizeof(buffer) - 1) return ret;
+        // if ((unsigned int) l < sizeof(buffer) - 1) return ret;
     }
 }
 
@@ -86,6 +87,12 @@ string Downloader::parseUrl(const string& url) {
 }
 
 Response Downloader::download(string url) {
+	sock = prepareSock(server.c_str(), 80);
+	if (sock == -1) {
+		cout << "socket error" << endl;
+		return Response("", verbose);
+	}
+
 	url = parseUrl(url);
     string header = getHeader(url);
     if (verbose) {
@@ -99,6 +106,8 @@ Response Downloader::download(string url) {
     // handle MOVED responses
     if (r.moved)
     	return download(r.headers["Location"]);
+
+    close(sock);
 
     return r;
 }

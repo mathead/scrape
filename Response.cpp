@@ -4,11 +4,12 @@
 
 #include "Response.h"
 #include <sstream>
+#include <fstream>
 #include <iostream>
 
 using namespace std;
 
-Response::Response(string response, bool verbose) : ok(false), moved(false), fail(true), verbose(verbose) {
+Response::Response(const string& response, bool verbose) : ok(false), moved(false), fail(true), verbose(verbose) {
     if (verbose)
         cout << ">>> Parsing response:" << endl << response << endl << "------------------" << endl << endl;
 
@@ -30,7 +31,7 @@ Response::Response(string response, bool verbose) : ok(false), moved(false), fai
     while (getline(responsess, line)) {
         if (line[line.length() - 1] == 13) // handle CRLF
             line.resize(line.length() - 1);
-        
+
         if (!line.length())
             break; // end of headers
 
@@ -49,4 +50,10 @@ Response::Response(string response, bool verbose) : ok(false), moved(false), fai
         moved = true;
 
     fail = false;
+}
+
+void Response::writeFile(const string& path) {
+    ofstream file(path);
+    file << content;
+    file.close();
 }
