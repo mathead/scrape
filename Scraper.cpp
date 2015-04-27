@@ -3,6 +3,9 @@
 //
 
 #include "Scraper.h"
+#include "HrefLinkFinder.h"
+#include "InternetLinkReplacer.h"
+#include "ImageLinkFinder.h"
 #include <iostream>
 using namespace std;
 

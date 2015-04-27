@@ -11,8 +11,6 @@
 #include "Downloader.h"
 #include "Response.h"
 #include "LinkFinder.h"
-#include "HrefLinkFinder.h"
-#include "InternetLinkReplacer.h"
 
 typedef std::unique_ptr<LinkFinder> linkFinderPtr;
 

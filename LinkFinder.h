@@ -10,6 +10,8 @@
 class LinkFinder {
 protected:
     LinkReplacer* linkReplacer;
+    bool findTagAttr(const std::string& tag, const std::string& attribute, Response& response, size_t& startpos,
+                     size_t& start, size_t& end);
 public:
     LinkFinder(LinkReplacer* linkReplacer);
     virtual ~LinkFinder();
