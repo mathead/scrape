@@ -9,9 +9,10 @@
 
 using namespace std;
 
-Response::Response(const string& response, bool verbose) : ok(false), moved(false), fail(true), verbose(verbose) {
-    if (verbose)
-        cout << ">>> Parsing response:" << endl << response << endl << "------------------" << endl << endl;
+Response::Response(const string& response, const string& server, bool verbose) :
+        ok(false), moved(false), fail(true), verbose(verbose), server(server) {
+//    if (verbose)
+//        cout << ">>> Parsing response:" << endl << response << endl << "------------------" << endl << endl;
 
     // parse response in member fields
     string line;

@@ -101,7 +101,7 @@ Response Downloader::download(string url) {
     }
 
     send(sock, header.c_str(), header.length(), 0);
-    Response r(receive(), verbose);
+    Response r(receive(), server, verbose);
 
     // handle MOVED responses
     if (r.moved)

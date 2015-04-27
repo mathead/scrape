@@ -16,7 +16,7 @@ public:
     bool verbose;
     int status;
     std::map<std::string, std::string> headers;
-    std::string content;
+    std::string content, server;
 
     Response(const std::string& response, bool verbose = false);
     void writeFile(const std::string& path);
