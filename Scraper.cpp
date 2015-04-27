@@ -3,9 +3,10 @@
 //
 
 #include "Scraper.h"
+#include <iostream>
 using namespace std;
 
-Scraper::Scraper() : fileNum(0) {
+Scraper::Scraper(bool verbose) : fileNum(0), verbose(verbose) {
 	linkFinders.push_back(linkFinderPtr(move(new HrefLinkFinder(new InternetLinkReplacer(this)))));
     // linkFinders = {
             // linkFinderPtr(move(new HrefLinkFinder(new InternetLinkReplacer(this)))),
@@ -17,17 +18,21 @@ Scraper::Scraper() : fileNum(0) {
     // };
 }
 
-void Scraper::scrape(const string& url, int depth) {
-    Downloader downloader(url);
+void Scraper::scrape(const string& url, int depth, bool first) {
+    Downloader downloader(url, verbose);
     Response page = downloader.download(url);
+	cout << "downloaded" << endl;
     for (auto &linkFinder : linkFinders)
         linkFinder->find(page, depth);
+	cout << "replaced" << endl;
+	if (first)
+		downloaded[url] = "index.html";
     page.writeFile(downloaded[url]);
 
     if (toDownload.size()) {
         DFile next = toDownload.front();
         toDownload.pop_front();
-        scrape(next.url, next.depth);
+        scrape(next.url, next.depth, false);
     }
 }
 

@@ -3,6 +3,7 @@
 //
 
 #include "InternetLinkReplacer.h"
+#include <iostream>
 using namespace std;
 
 InternetLinkReplacer::InternetLinkReplacer(Scraper *scraper) : LinkReplacer(scraper) { }

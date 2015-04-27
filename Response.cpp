@@ -19,7 +19,10 @@ Response::Response(const string& response, const string& server, bool verbose) :
     istringstream responsess(response); // read response line by line
 
     // protocol & status
-    if (!getline(responsess, line)) return;
+    if (!getline(responsess, line)) { 
+        content = response;
+        return; 
+    }
 
     istringstream liness(line);
     liness.ignore(20, ' '); // ignore the HTTP/1.0 bit
@@ -46,6 +49,12 @@ Response::Response(const string& response, const string& server, bool verbose) :
 
     // content
     getline(responsess, content, '\0');
+    // insert utf-8 charset meta tag, as it gets lost in headers
+    if (ok) {
+        size_t pos = 0;
+        if ((pos = content.find("<head>")) != string::npos)
+            content.insert(pos + 6, "\n<meta http-equiv=\"Content-Type\" content=\"charset=UTF-8\">\n");
+    }
 
     if (status >= 300 && status < 400 && headers.count("Location"))
         moved = true;

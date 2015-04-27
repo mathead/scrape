@@ -16,10 +16,9 @@
 using namespace std;
 
 
-Downloader::Downloader(string server, bool verbose) : server(server), verbose(verbose) {
+Downloader::Downloader(const string& server, bool verbose) : verbose(verbose) {
+    this->server = parseServer(server);
     // sock = prepareSock(server.c_str(), 80);
-    // if (sock == -1)
-    //     cout << "socket error";
 }
 
 Downloader::~Downloader() {
@@ -63,7 +62,6 @@ string Downloader::receive() {
         // the reply may be long - we read it in a loop
         int l = recv(sock, buffer, sizeof(buffer) - 1, 0);
         // l < 0 -> error, l == 0 -> finished
-        cout << "yoyoyoyoyo" << l << endl;
         if (l <= 0) return ret;
         buffer[l] = 0;
         ret += buffer;
@@ -73,16 +71,31 @@ string Downloader::receive() {
     }
 }
 
-string Downloader::getHeader(string url) {
+string Downloader::getHeader(const string& url) {
     return "GET " + url + " HTTP/1.0\n" + additionalHeaders + "\n";
 }
 
-string Downloader::parseUrl(const string& url) {
+string Downloader::parseUrl(string url) {
 	// trim http:// from url
 	size_t found;
 	if ((found = url.find("://")) != string::npos)
-		return url.substr(found + 3);
+		url = url.substr(found + 3);
+
+    if (url.find('/') == string::npos)
+        url += '/';
+
 	return url;
+}
+
+string Downloader::parseServer(string url) {
+    size_t found;
+    if ((found = url.find("://")) != string::npos)
+        url = url.substr(found + 3);
+
+    if ((found = url.find('/')) != string::npos)
+        url = url.substr(0, found);
+
+    return url;
 }
 
 Response Downloader::download(string url) {
@@ -101,10 +114,11 @@ Response Downloader::download(string url) {
 
     send(sock, header.c_str(), header.length(), 0);
     Response r(receive(), server, verbose);
-
     // handle MOVED responses
     if (r.moved)
-    	return download(r.headers["Location"]);
+        return download(r.headers["Location"]);
+    if (r.fail && verbose)
+        cout << ">>> Error fetching " << url << " status: " << r.status << endl;
 
     close(sock);
 

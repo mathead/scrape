@@ -21,10 +21,11 @@ class Downloader {
 
     int prepareSock(const char * listenAddr, int port);
     std::string receive();
-    std::string getHeader(std::string url);
-    std::string parseUrl(const std::string& url);
+    std::string getHeader(const std::string& url);
+    std::string parseUrl(std::string url);
+    std::string parseServer(std::string url);
 public:
-    Downloader(std::string server, bool verbose = false);
+    Downloader(const std::string& server, bool verbose = false);
     ~Downloader();
     Response download(std::string url);
 };

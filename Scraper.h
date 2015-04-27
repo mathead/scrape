@@ -27,10 +27,11 @@ class Scraper {
     std::list<DFile> toDownload;
     std::map<std::string, std::string> downloaded;
     int fileNum;
+    bool verbose;
 public:
-    Scraper();
+    Scraper(bool verbose = false);
 
-    void scrape(const std::string& url, int depth);
+    void scrape(const std::string& url, int depth, bool first = true);
 
     std::string enqueueDownload(const std::string& url, const std::string& suffix, int depth);
 };
