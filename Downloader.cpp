@@ -3,6 +3,7 @@
 //
 
 #include "Downloader.h"
+#include "Response.h"
 #include <cstdio>
 #include <cstring>
 #include <cctype>
@@ -53,17 +54,19 @@ int Downloader::prepareSock(const char *listenAddr, int port) {
 }
 
 string Downloader::receive() {
-    // receive & print everything until newline.
+    string ret;
     while (1) {
         char buffer[50];
         // the reply may be long - we read it in a loop
         int l = recv(sock, buffer, sizeof(buffer) - 1, 0);
         // l < 0 -> error, l == 0 -> finished
-        if (l <= 0) return "";
+        if (l <= 0) return ret;
         buffer[l] = 0;
-        printf("%s", buffer);
+        if (verbose)
+            printf("%s", buffer);
+        ret += buffer;
         // if EOF -> return
-        if (index(buffer, EOF)) return "";
+        if (index(buffer, EOF)) return ret;
     }
 }
 
@@ -71,10 +74,15 @@ string Downloader::getHeader(string url) {
     return "GET " + url + " HTTP/1.0\n" + additionalHeaders + "\n";
 }
 
-string Downloader::download(string url) {
+Response Downloader::download(string url) {
     string header = getHeader(url);
-    cout << header;
+    if (verbose) {
+        cout << "Downloading " << url << " from server " << server << " with header " << endl;
+        cout << header;
+        cout << endl << "------------------" << endl << endl;
+    }
     send(sock, header.c_str(), header.length(), 0);
+    Response r(receive(), verbose);
 
-    return receive();
+    return r;
 }
