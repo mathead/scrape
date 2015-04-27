@@ -15,14 +15,14 @@
 using namespace std;
 
 
-Downloader::Downloader(string server) : server(server) {
-    socket = prepareSock(server.c_str(), 80);
-    if (socket == -1)
+Downloader::Downloader(string server, bool verbose) : server(server), verbose(verbose) {
+    sock = prepareSock(server.c_str(), 80);
+    if (sock == -1)
         cout << "socket error";
 }
 
 Downloader::~Downloader() {
-    close(socket);
+    close(sock);
 }
 
 int Downloader::prepareSock(const char *listenAddr, int port) {
@@ -30,21 +30,26 @@ int Downloader::prepareSock(const char *listenAddr, int port) {
     char portTx[20];
 
     snprintf(portTx, sizeof(portTx), "%d", port);
-    if (getaddrinfo(listenAddr, portTx, NULL, &ai) != 0) return -1;
+    int error;
+    if ((error = getaddrinfo(listenAddr, portTx, NULL, &ai)) != 0) { 
+    	if (verbose)
+    		cerr << gai_strerror(error) << endl;
+    	return -1;
+    }
 
-    int sock = socket(ai->ai_family, SOCK_STREAM, 0);
-    if (sock == -1) {
+    int tsock = socket(ai->ai_family, SOCK_STREAM, 0);
+    if (tsock == -1) {
         freeaddrinfo(ai);
         return -1;
     }
 
-    if (connect(sock, ai->ai_addr, ai->ai_addrlen) != 0) {
-        close(sock);
+    if (connect(tsock, ai->ai_addr, ai->ai_addrlen) != 0) {
+        close(tsock);
         freeaddrinfo(ai);
         return -1;
     }
     freeaddrinfo(ai);
-    return sock;
+    return tsock;
 }
 
 string Downloader::receive() {
@@ -52,13 +57,13 @@ string Downloader::receive() {
     while (1) {
         char buffer[50];
         // the reply may be long - we read it in a loop
-        int l = recv(socket, buffer, sizeof(buffer) - 1, 0);
+        int l = recv(sock, buffer, sizeof(buffer) - 1, 0);
         // l < 0 -> error, l == 0 -> finished
         if (l <= 0) return "";
         buffer[l] = 0;
         printf("%s", buffer);
-        // if newline -> return
-        if (index(buffer, '\n')) return "";
+        // if EOF -> return
+        if (index(buffer, EOF)) return "";
     }
 }
 
@@ -68,7 +73,8 @@ string Downloader::getHeader(string url) {
 
 string Downloader::download(string url) {
     string header = getHeader(url);
-    send(socket, header.c_str(), header.length(), 0);
+    cout << header;
+    send(sock, header.c_str(), header.length(), 0);
 
     return receive();
 }

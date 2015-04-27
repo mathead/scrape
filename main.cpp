@@ -4,7 +4,7 @@
 using namespace std;
 
 int main() {
-    Downloader d("http://www.jmarshall.com/");
+    Downloader d("google.com", true);
     d.download("/");
 
     return 0;

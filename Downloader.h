@@ -9,14 +9,15 @@
 
 class Downloader {
     std::string server;
-    int socket;
+    int sock;
+    bool verbose;
     const char * additionalHeaders = "User-Agent: HTTPTool/1.0\n";
 
     int prepareSock(const char * listenAddr, int port);
     std::string receive();
     std::string getHeader(std::string url);
 public:
-    Downloader(std::string server);
+    Downloader(std::string server, bool verbose = false);
     ~Downloader();
     std::string download(std::string url);
 };
