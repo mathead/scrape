@@ -12,6 +12,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <iostream>
+#include <regex>
 
 using namespace std;
 
@@ -54,19 +55,21 @@ int Downloader::prepareSock(const char *listenAddr, int port) {
 }
 
 string Downloader::receive() {
+	if (verbose)
+        cout << ">>> Receiving from server " << server << endl;
+
     string ret;
     while (1) {
-        char buffer[50];
+        char buffer[100];
         // the reply may be long - we read it in a loop
         int l = recv(sock, buffer, sizeof(buffer) - 1, 0);
         // l < 0 -> error, l == 0 -> finished
         if (l <= 0) return ret;
         buffer[l] = 0;
-        if (verbose)
-            printf("%s", buffer);
         ret += buffer;
+
         // if EOF -> return
-        if (index(buffer, EOF)) return ret;
+        if ((unsigned int) l < sizeof(buffer) - 1) return ret;
     }
 }
 
@@ -74,15 +77,28 @@ string Downloader::getHeader(string url) {
     return "GET " + url + " HTTP/1.0\n" + additionalHeaders + "\n";
 }
 
+string Downloader::parseUrl(const string& url) {
+	// trim http:// from url
+	size_t found;
+	if ((found = url.find("://")) != string::npos)
+		return url.substr(found + 3);
+	return url;
+}
+
 Response Downloader::download(string url) {
+	url = parseUrl(url);
     string header = getHeader(url);
     if (verbose) {
-        cout << "Downloading " << url << " from server " << server << " with header " << endl;
-        cout << header;
-        cout << endl << "------------------" << endl << endl;
+        cout << ">>> Requesting " << url << " from server " << server << " with header:" << endl;
+        cout << header << "------------------" << endl << endl;
     }
+
     send(sock, header.c_str(), header.length(), 0);
     Response r(receive(), verbose);
+
+    // handle MOVED responses
+    if (r.moved)
+    	return download(r.headers["Location"]);
 
     return r;
 }

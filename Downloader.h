@@ -5,6 +5,7 @@
 #ifndef SEMESTRALKA_DOWNLOADER_H
 #define SEMESTRALKA_DOWNLOADER_H
 
+#include "Response.h"
 #include <string>
 
 class Downloader {
@@ -19,10 +20,11 @@ class Downloader {
     int prepareSock(const char * listenAddr, int port);
     std::string receive();
     std::string getHeader(std::string url);
+    std::string parseUrl(const std::string& url);
 public:
     Downloader(std::string server, bool verbose = false);
     ~Downloader();
-    std::string download(std::string url);
+    Response download(std::string url);
 };
 
 

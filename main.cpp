@@ -5,7 +5,7 @@ using namespace std;
 
 int main() {
     Downloader d("google.com", true);
-    d.download("/?gfe_rd=cr&ei=yhE-VdebBcyk8weEx4HwDQ");
+    d.download("/");
 
     return 0;
 }

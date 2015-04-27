@@ -8,9 +8,9 @@
 
 using namespace std;
 
-Response::Response(string response, bool verbose) : ok(false), fail(true), verbose(verbose) {
+Response::Response(string response, bool verbose) : ok(false), moved(false), fail(true), verbose(verbose) {
     if (verbose)
-        cout << "Parsing reponse:" << endl << response << endl << "------------------" << endl << endl;
+        cout << ">>> Parsing response:" << endl << response << endl << "------------------" << endl << endl;
 
     // parse response in member fields
     string line;
@@ -28,7 +28,10 @@ Response::Response(string response, bool verbose) : ok(false), fail(true), verbo
 
     // headers
     while (getline(responsess, line)) {
-        if (line == "")
+        if (line[line.length() - 1] == 13) // handle CRLF
+            line.resize(line.length() - 1);
+        
+        if (!line.length())
             break; // end of headers
 
         istringstream headerss(line);
