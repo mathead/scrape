@@ -3,6 +3,7 @@
 //
 
 #include "HrefLinkFinder.h"
+#include <iostream>
 using namespace std;
 
 HrefLinkFinder::HrefLinkFinder(LinkReplacer *linkReplacer) : LinkFinder(linkReplacer) { }

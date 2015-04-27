@@ -5,7 +5,6 @@
 #ifndef SEMESTRALKA_SCRAPER_H
 #define SEMESTRALKA_SCRAPER_H
 
-#include <vector>
 #include <list>
 #include <memory>
 #include "Downloader.h"
@@ -21,16 +20,18 @@ struct DFile {
 };
 
 class Scraper {
-    std::vector<linkFinderPtr> linkFinders;
+    std::list<linkFinderPtr> linkFinders;
+    std::list<linkFinderPtr> linkFindersDepth0;
     std::list<DFile> toDownload;
     std::map<std::string, std::string> downloaded;
     int fileNum;
     bool verbose;
 public:
+    bool missingCreated;
+    std::string filesPath = "files";
+
     Scraper(bool verbose = false);
-
     void scrape(const std::string& url, int depth, bool first = true);
-
     std::string enqueueDownload(const std::string& url, const std::string& suffix, int depth);
 };
 

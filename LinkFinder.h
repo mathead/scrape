@@ -6,12 +6,13 @@
 #define SEMESTRALKA_LINKFINDER_H
 
 #include "LinkReplacer.h"
+#include <list>
 
 class LinkFinder {
 protected:
     LinkReplacer* linkReplacer;
     bool findTagAttr(const std::string& tag, const std::string& attribute, Response& response, size_t& startpos,
-                     size_t& start, size_t& end);
+                     size_t& start, size_t& end, std::list<std::string> mandatory_attributes = {});
 public:
     LinkFinder(LinkReplacer* linkReplacer);
     virtual ~LinkFinder();
