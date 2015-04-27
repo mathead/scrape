@@ -8,6 +8,7 @@ using namespace std;
 
 Scraper::Scraper(bool verbose) : fileNum(0), verbose(verbose) {
 	linkFinders.push_back(linkFinderPtr(move(new HrefLinkFinder(new InternetLinkReplacer(this)))));
+	linkFinders.push_back(linkFinderPtr(move(new ImageLinkFinder(new InternetLinkReplacer(this)))));
     // linkFinders = {
             // linkFinderPtr(move(new HrefLinkFinder(new InternetLinkReplacer(this)))),
 //                linkFinderPtr(new HrefLinkFinder(new DownloadLinkReplacer(this, true))),

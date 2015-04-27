@@ -84,6 +84,8 @@ string Downloader::parseUrl(string url) {
     if (url.find('/') == string::npos)
         url += '/';
 
+    url = url.substr(url.find('/'));
+
 	return url;
 }
 
@@ -114,11 +116,12 @@ Response Downloader::download(string url) {
 
     send(sock, header.c_str(), header.length(), 0);
     Response r(receive(), server, verbose);
+    if (verbose)
+        cout << ">>> Received " << url << " status: " << r.status << endl;
+    
     // handle MOVED responses
     if (r.moved)
         return download(r.headers["Location"]);
-    if (r.fail && verbose)
-        cout << ">>> Error fetching " << url << " status: " << r.status << endl;
 
     close(sock);
 
