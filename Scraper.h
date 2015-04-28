@@ -23,12 +23,13 @@ class Scraper {
     std::list<linkFinderPtr> linkFinders;
     std::list<linkFinderPtr> linkFindersDepth0;
     std::list<DFile> toDownload;
-    std::map<std::string, std::string> downloaded;
     int fileNum;
     bool verbose;
 public:
     bool missingCreated;
-    std::string filesPath = "files";
+    std::map<std::string, std::string> downloaded;
+    std::string filesPath;
+    std::string filesDir;
 
     Scraper(bool verbose = false);
     void scrape(const std::string& url, int depth, bool first = true);

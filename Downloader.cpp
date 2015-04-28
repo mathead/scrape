@@ -100,7 +100,7 @@ string Downloader::parseServer(string url) {
     return url;
 }
 
-Response Downloader::download(string url) {
+Response Downloader::download(string url, int maxhops) {
 	sock = prepareSock(server.c_str(), 80);
 	if (sock == -1) {
 		cout << "socket error" << endl;
@@ -110,8 +110,8 @@ Response Downloader::download(string url) {
 	url = parseUrl(url);
     string header = getHeader(url);
     if (verbose) {
-        cout << ">>> Requesting " << url << " from server " << server << " with header:" << endl;
-        cout << header << "------------------" << endl << endl;
+        cout << ">>> Requesting " << url << " from server " << server << endl;
+        // cout << header << "------------------" << endl << endl;
     }
 
     send(sock, header.c_str(), header.length(), 0);
@@ -119,11 +119,12 @@ Response Downloader::download(string url) {
     if (verbose)
         cout << ">>> Received " << url << " status: " << r.status << endl;
     
-    // handle MOVED responses
-    if (r.moved)
-        return download(r.headers["Location"]);
-
     close(sock);
+
+    // handle MOVED responses
+    if (r.moved && maxhops > 0)
+        return download(r.headers["Location"], maxhops - 1);
+
 
     return r;
 }

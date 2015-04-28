@@ -11,7 +11,7 @@ int main() {
     // r.writeFile("out.html");
 
 	Scraper s(true);
-	s.scrape("cvut.cz/vitejte-na-cvut", 0);
+	s.scrape("cvut.cz/vitejte-na-cvut", 2);
 
     return 0;
 }

@@ -27,7 +27,7 @@ class Downloader {
 public:
     Downloader(const std::string& server, bool verbose = false);
     ~Downloader();
-    Response download(std::string url);
+    Response download(std::string url, int maxhops = 3);
 };
 
 

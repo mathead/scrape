@@ -16,7 +16,7 @@ protected:
 public:
     LinkReplacer(Scraper* scraper);
     virtual ~LinkReplacer();
-    virtual std::string replace(const std::string& str, const Response& response) = 0;
+    virtual std::string replace(const std::string& str, const Response& response, int depth = 0) = 0;
 };
 
 

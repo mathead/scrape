@@ -11,7 +11,7 @@ class Scraper;
 class InternetLinkReplacer : public LinkReplacer {
 public:
     InternetLinkReplacer(Scraper *scraper);
-    std::string replace(const std::string& str, const Response& response);
+    std::string replace(const std::string& str, const Response& response, int depth = 0);
 };
 
 
