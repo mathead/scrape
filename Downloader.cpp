@@ -60,14 +60,13 @@ string Downloader::receive() {
     while (1) {
         char buffer[1024];
         // the reply may be long - we read it in a loop
-        int l = recv(sock, buffer, sizeof(buffer) - 1, 0);
+        int l = recv(sock, buffer, sizeof(buffer), 0);
         // l < 0 -> error, l == 0 -> finished
         if (l <= 0) return ret;
-        buffer[l] = 0;
-        ret += buffer;
+        ret.append(buffer, l);
 
         // if EOF -> return
-        // if ((unsigned int) l < sizeof(buffer) - 1) return ret;
+        // if ((unsigned int) l < sizeof(buffer)) return ret;
     }
 }
 
@@ -103,7 +102,8 @@ string Downloader::parseServer(string url) {
 Response Downloader::download(string url, int maxhops) {
 	sock = prepareSock(server.c_str(), 80);
 	if (sock == -1) {
-		cout << "socket error" << endl;
+        if (verbose)
+            cout << "socket error" << endl;
 		return Response("", server, verbose);
 	}
 

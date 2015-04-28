@@ -11,8 +11,8 @@ using namespace std;
 
 Response::Response(const string& response, const string& server, bool verbose) :
         ok(false), moved(false), fail(true), verbose(verbose), server(server) {
-//    if (verbose)
-//        cout << ">>> Parsing response:" << endl << response << endl << "------------------" << endl << endl;
+   // if (verbose)
+   //     cout << ">>> Parsing response:" << endl << response << endl << "------------------" << endl << endl;
 
     // parse response in member fields
     string line;
@@ -48,9 +48,13 @@ Response::Response(const string& response, const string& server, bool verbose) :
     }
 
     // content
-    getline(responsess, content, '\0');
+    while (getline(responsess, line))
+        content += line + '\n';
+    if (content.length())
+        content.pop_back();
+
     // insert utf-8 charset meta tag, as it gets lost in headers
-    if (ok) {
+    if (ok && headers.count("Content-Type") && headers["Content-Type"].find("html") != string::npos) {
         size_t pos = 0;
         if ((pos = content.find("<head>")) != string::npos)
             content.insert(pos + 6, "\n<meta http-equiv=\"Content-Type\" content=\"charset=UTF-8\">\n");
@@ -63,7 +67,8 @@ Response::Response(const string& response, const string& server, bool verbose) :
 }
 
 void Response::writeFile(const string& path) {
-    ofstream file(path);
+    ofstream file(path, ios::binary);
+    // file.write(content.c_str(), content.length());
     file << content;
     file.close();
 }

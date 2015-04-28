@@ -23,8 +23,10 @@ class Scraper {
     std::list<linkFinderPtr> linkFinders;
     std::list<linkFinderPtr> linkFindersDepth0;
     std::list<DFile> toDownload;
-    int fileNum;
+    int fileNum, startDepth, lastDepth, lastDepthDownloaded;
     bool verbose;
+
+    void updateStatusLine(int depth);
 public:
     bool missingCreated;
     std::map<std::string, std::string> downloaded;

@@ -18,7 +18,8 @@
 #include <stdlib.h>
 using namespace std;
 
-Scraper::Scraper(bool verbose) : fileNum(0), verbose(verbose), missingCreated(false), filesDir("files") {
+Scraper::Scraper(bool verbose) : fileNum(0), lastDepth(-1), lastDepthDownloaded(0), verbose(verbose),
+								 missingCreated(false), filesDir("files") {
 	linkFinders.push_back(linkFinderPtr(move(new HrefLinkFinder(new DownloadLinkReplacer(this, true)))));
 	linkFinders.push_back(linkFinderPtr(move(new ImageLinkFinder(new InternetLinkReplacer(this)))));
 	linkFinders.push_back(linkFinderPtr(move(new CSSLinkFinder(new InternetLinkReplacer(this)))));
@@ -50,6 +51,8 @@ void Scraper::scrape(const string& url, int depth, bool first) {
     Response page = downloader.download(url);
 
 	if (first) {
+		startDepth = depth;
+		lastDepth = startDepth;
 		InternetLinkReplacer i(this);
 		downloaded[i.replace(url, page)] = filesPath.substr(0, filesPath.length() - filesDir.length() - 1) + "index.html";
 		downloaded[url] = "index.html";
@@ -57,6 +60,7 @@ void Scraper::scrape(const string& url, int depth, bool first) {
 
 	if (verbose)
 		cout << ">>> Downloaded" << endl;
+	updateStatusLine(depth);
 
 	if (depth > 0)
 	    for (auto &linkFinder : linkFinders)
@@ -88,4 +92,38 @@ string Scraper::enqueueDownload(const string& url, const string& suffix, int dep
     }
 
     return downloaded[url];
+}
+
+void Scraper::updateStatusLine(int depth) {
+	lastDepthDownloaded++;
+
+	if (depth == 0) {
+		for (auto &f : toDownload) {
+			if (f.depth > depth)
+				depth = f.depth;
+		}
+	}
+
+	int count = 0;
+	for (auto &f : toDownload) {
+		if (f.depth >= depth)
+			count++;
+	}
+
+	if (depth != lastDepth) {
+		cout << endl;
+		lastDepth = depth;
+		lastDepthDownloaded = 0;
+	}
+
+	cout << "\rDepth: " << startDepth - depth << " - [";
+	int total = max(count + lastDepthDownloaded, 1);
+	for (int i = 0; i < 20; i++) {
+		if (lastDepthDownloaded * 20 / total > i)
+			cout << '=';
+		else
+			cout << ' ';
+	}
+	cout << "] " << lastDepthDownloaded * 100 / total << "% - " << 
+            lastDepthDownloaded << '/' << total << " files downloaded              " << std::flush;
 }

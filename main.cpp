@@ -7,11 +7,12 @@ using namespace std;
 
 int main() {
     // Downloader d("cvut.cz", true);
-    // Response r = d.download("/");
-    // r.writeFile("out.html");
+    // Response r = d.download("/documents/10552/2e52fe20-e64e-4951-9199-6a35a8496302");
+    // r.writeFile("out.pdf");
 
-	Scraper s(true);
-	s.scrape("cvut.cz/vitejte-na-cvut", 2);
+	Scraper s;
+	s.scrape("cvut.cz/mapa-cvut", 2);
+	cout << endl;
 
     return 0;
 }
