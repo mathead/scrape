@@ -122,8 +122,10 @@ Response Downloader::download(string url, int maxhops) {
     close(sock);
 
     // handle MOVED responses
-    if (r.moved && maxhops > 0)
+    if (r.moved && maxhops > 0) {
+        server = parseServer(r.headers["Location"]);
         return download(r.headers["Location"], maxhops - 1);
+    }
 
 
     return r;

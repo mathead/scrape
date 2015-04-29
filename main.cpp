@@ -11,7 +11,7 @@ int main() {
     // r.writeFile("out.pdf");
 
 	Scraper s;
-	s.scrape("cvut.cz/mapa-cvut", 2);
+	s.scrape("dontclick.it", 2);
 	cout << endl;
 
     return 0;
