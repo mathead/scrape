@@ -25,16 +25,17 @@ class Scraper {
     std::list<DFile> toDownload;
     int fileNum, startDepth, lastDepth, lastDepthDownloaded;
     bool verbose;
+    std::string indexName;
 
-    void updateStatusLine(int depth);
+    void updateStatusLine(const std::string& url, int depth);
 public:
     bool missingCreated;
     std::map<std::string, std::string> downloaded;
     std::string filesPath;
     std::string filesDir;
 
-    Scraper(bool verbose = false);
-    void scrape(const std::string& url, int depth, bool first = true);
+    Scraper(const std::string& indexName = "index.html", const std::string& filesDir = "files", bool verbose = false);
+    bool scrape(const std::string& url, int depth, bool first = true);
     std::string enqueueDownload(const std::string& url, const std::string& suffix, int depth);
 };
 

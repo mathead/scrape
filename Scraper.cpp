@@ -18,8 +18,10 @@
 #include <stdlib.h>
 using namespace std;
 
-Scraper::Scraper(bool verbose) : fileNum(0), lastDepth(-1), lastDepthDownloaded(0), verbose(verbose),
-								 missingCreated(false), filesDir("files") {
+Scraper::Scraper(const string& indexName, const string& filesDir, bool verbose) : 
+					 fileNum(0), lastDepth(-1), lastDepthDownloaded(0), verbose(verbose),
+					 indexName(indexName), missingCreated(false), filesDir(filesDir) {
+
 	linkFinders.push_back(linkFinderPtr(move(new HrefLinkFinder(new DownloadLinkReplacer(this, true)))));
 	linkFinders.push_back(linkFinderPtr(move(new ImageLinkFinder(new InternetLinkReplacer(this)))));
 	linkFinders.push_back(linkFinderPtr(move(new CSSLinkFinder(new InternetLinkReplacer(this)))));
@@ -46,21 +48,28 @@ Scraper::Scraper(bool verbose) : fileNum(0), lastDepth(-1), lastDepthDownloaded(
 	free(abspath);
 }
 
-void Scraper::scrape(const string& url, int depth, bool first) {
+bool Scraper::scrape(const string& url, int depth, bool first) {
     Downloader downloader(url, verbose);
     Response page = downloader.download(url);
 
 	if (first) {
+		if (!page.ok) {
+			cerr << "Couldn't download " << url << endl 
+				 << "Server " << page.server << " responded with status " << page.status;
+			return 1;
+		}
+
 		startDepth = depth;
 		lastDepth = startDepth;
 		InternetLinkReplacer i(this);
-		downloaded[i.replace(url, page)] = filesPath.substr(0, filesPath.length() - filesDir.length() - 1) + "index.html";
-		downloaded[url] = "index.html";
+		cout << i.replace(url, page) << endl;
+		downloaded[i.replace(url, page)] = filesPath.substr(0, filesPath.length() - filesDir.length() - 1) + indexName;
+		downloaded[url] = indexName;
 	}
 
 	if (verbose)
 		cout << ">>> Downloaded" << endl;
-	updateStatusLine(depth);
+	updateStatusLine(url, depth);
 
 	if (depth > 0)
 	    for (auto &linkFinder : linkFinders)
@@ -80,6 +89,8 @@ void Scraper::scrape(const string& url, int depth, bool first) {
         toDownload.pop_front();
         scrape(next.url, next.depth, false);
     }
+
+    return true;
 }
 
 string Scraper::enqueueDownload(const string& url, const string& suffix, int depth) {
@@ -94,7 +105,7 @@ string Scraper::enqueueDownload(const string& url, const string& suffix, int dep
     return downloaded[url];
 }
 
-void Scraper::updateStatusLine(int depth) {
+void Scraper::updateStatusLine(const string& url, int depth) {
 	lastDepthDownloaded++;
 
 	if (depth == 0) {
@@ -125,5 +136,12 @@ void Scraper::updateStatusLine(int depth) {
 			cout << ' ';
 	}
 	cout << "] " << lastDepthDownloaded * 100 / total << "% - " << 
-            lastDepthDownloaded << '/' << total << " files downloaded              " << std::flush;
+            lastDepthDownloaded << '/' << total << " files downloaded - Downloading ";
+    if (url.length() < 50) {
+    	cout << url;
+    	for (int i = url.length(); i < 50; i++)
+    		cout << ' ';
+    } else 
+    	cout << url.substr(0, 46) << "...";
+    cout << std::flush;
 }

@@ -15,7 +15,7 @@ class Downloader {
     const char * additionalHeaders = 
     "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:37.0) Gecko/20100101 Firefox/37.0\n"
     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n"
-    // "Accept-Charset: utf-8\n"
+    "Accept-Charset: utf-8\n"
     // "Connection: keep-alive\n"
     "Cache-Control: max-age=0\n";
 

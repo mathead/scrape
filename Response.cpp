@@ -10,7 +10,7 @@
 using namespace std;
 
 Response::Response(const string& response, const string& server, bool verbose) :
-        ok(false), moved(false), fail(true), verbose(verbose), server(server) {
+        ok(false), moved(false), fail(true), verbose(verbose), status(-1), server(server) {
    // if (verbose)
    //     cout << ">>> Parsing response:" << endl << response << endl << "------------------" << endl << endl;
 
