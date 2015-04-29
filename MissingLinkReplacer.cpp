@@ -15,13 +15,5 @@ string MissingLinkReplacer::replace(const string &str, const Response& response,
     if (scraper->downloaded.count(link))
         return "file://" + scraper->downloaded[link];
 
-    if (!scraper->missingCreated) {
-        ofstream file(scraper->filesPath + "/missing.html");
-        file << "Unfortunately, this page isn't downloaded :(";
-        file.close();
-
-        scraper->missingCreated = true;
-    }
-    
-    return "file://" + scraper->filesPath + "/missing.html";
+    return scraper->getMissingPage();
 }

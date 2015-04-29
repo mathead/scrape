@@ -12,15 +12,17 @@
 #include "FaviconLinkFinder.h"
 #include "JSLinkFinder.h"
 #include <iostream>
+#include <fstream>
+#include <list>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
 using namespace std;
 
-Scraper::Scraper(const string& indexName, const string& filesDir, bool verbose) : 
-					 fileNum(0), lastDepth(-1), lastDepthDownloaded(0), verbose(verbose),
-					 indexName(indexName), missingCreated(false), filesDir(filesDir) {
+Scraper::Scraper(const list<string>& filters, const list<string>& antifilters, const string& indexName, const string& filesDir, bool stayOnServer, bool verbose) : 
+					 filters(filters), antifilters(antifilters), fileNum(0), lastDepth(-1), lastDepthDownloaded(0), stayOnServer(stayOnServer),
+					 verbose(verbose), missingCreated(false), indexName(indexName), filesDir(filesDir) {
 
 	linkFinders.push_back(linkFinderPtr(move(new HrefLinkFinder(new DownloadLinkReplacer(this, true)))));
 	linkFinders.push_back(linkFinderPtr(move(new ImageLinkFinder(new InternetLinkReplacer(this)))));
@@ -34,6 +36,8 @@ Scraper::Scraper(const string& indexName, const string& filesDir, bool verbose) 
 	linkFindersDepth0.push_back(linkFinderPtr(move(new FaviconLinkFinder(new InternetLinkReplacer(this)))));
 	linkFindersDepth0.push_back(linkFinderPtr(move(new JSLinkFinder(new InternetLinkReplacer(this)))));
 
+
+	this->antifilters.push_back("mailto:");
 
 	// create files directory
 	struct stat st = {0};
@@ -60,9 +64,9 @@ bool Scraper::scrape(const string& url, int depth, bool first) {
 		}
 
 		startDepth = depth;
+		startServer = page.server;
 		lastDepth = startDepth;
 		InternetLinkReplacer i(this);
-		cout << i.replace(url, page) << endl;
 		downloaded[i.replace(url, page)] = filesPath.substr(0, filesPath.length() - filesDir.length() - 1) + indexName;
 		downloaded[url] = indexName;
 	}
@@ -84,9 +88,10 @@ bool Scraper::scrape(const string& url, int depth, bool first) {
     page.writeFile(downloaded[url]);
 
 
-    if (toDownload.size()) {
+    if(toDownload.size()) {
         DFile next = toDownload.front();
         toDownload.pop_front();
+
         scrape(next.url, next.depth, false);
     }
 
@@ -95,14 +100,34 @@ bool Scraper::scrape(const string& url, int depth, bool first) {
 
 string Scraper::enqueueDownload(const string& url, const string& suffix, int depth) {
     if (!downloaded.count(url)) {
+        if (stayOnServer && Downloader::parseServer(url).find(startServer) == string::npos) {
+        	if (verbose)
+				cout << ">>> Skipping " << url << endl;
+        	return url;
+        }
+
+        for (auto &f : filters)
+			if (url.find(f) == string::npos) {
+				if (verbose)
+					cout << ">>> Skipping " << url << endl;
+				return url;
+			}
+		for (auto &f : antifilters)
+			if (url.find(f) != string::npos) {
+				if (verbose)
+					cout << ">>> Skipping " << url << endl;
+				return url;
+			}
+
+
 		if (verbose)
-			cout << "Enqueued " << url << " with suffix " << suffix << " depth " << depth << endl;
+			cout << ">>> Enqueued " << url << " with suffix " << suffix << " depth " << depth << endl;
 
         toDownload.push_back(DFile(url, depth));
         downloaded[url] = filesPath + "/file" + std::to_string(fileNum++) + suffix;
     }
 
-    return downloaded[url];
+    return "file://" + downloaded[url];
 }
 
 void Scraper::updateStatusLine(const string& url, int depth) {
@@ -144,4 +169,16 @@ void Scraper::updateStatusLine(const string& url, int depth) {
     } else 
     	cout << url.substr(0, 46) << "...";
     cout << std::flush;
+}
+
+string Scraper::getMissingPage() {
+	if (!missingCreated) {
+        ofstream file(filesPath + "/missing.html");
+        file << "Unfortunately, this page isn't downloaded :(";
+        file.close();
+
+        missingCreated = true;
+    }
+
+    return "file://" + filesPath + "/missing.html";
 }

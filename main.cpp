@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <unistd.h>
 #include "Downloader.h"
 #include "Response.h"
@@ -12,22 +13,28 @@ int main(int argc, char **argv) {
     // r.writeFile("out.pdf");
 
 	bool verbose = false;
+	bool stay_on_server = false;
 	string output_file = "index.html";
 	string output_dir = "files";
+	string filter = "";
+	string antifilter = "";
 	int depth = 0;
 	int c, d;
 
 	opterr = 0;
 
-	while ((c = getopt(argc, argv, ":vf:o:d:")) != -1) {
+	while ((c = getopt(argc, argv, ":vsF:D:d:f:a:")) != -1) {
 		switch (c) {
 			case 'v':
 				verbose = true;
 				break;
-			case 'f':
+			case 's':
+				stay_on_server = true;
+				break;
+			case 'F':
 				output_file = optarg;
 				break;
-			case 'o':
+			case 'D':
 				output_dir = optarg;
 				break;
 			case 'd':
@@ -44,6 +51,12 @@ int main(int argc, char **argv) {
 				}
 
 				depth = d;
+				break;
+			case 'f':
+				filter = optarg;
+				break;
+			case 'a':
+				antifilter = optarg;
 				break;
 			case '?':
 				cerr << "Unknown option '-" << (char) optopt << "'." << endl;
@@ -64,7 +77,18 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	Scraper s(output_file, output_dir, verbose);
+	list<string> filters;
+	list<string> antifilters;
+	istringstream iss(filter);
+	string item;
+	while (getline(iss, item, ','))
+		filters.push_back(item);
+	istringstream aiss(antifilter);
+	while (getline(aiss, item, ','))
+		antifilters.push_back(item);
+
+
+	Scraper s(filters, antifilters, output_file, output_dir, stay_on_server, verbose);
 	bool success = s.scrape(argv[argc - 1], depth);
 	cout << endl;
 

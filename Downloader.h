@@ -22,12 +22,13 @@ class Downloader {
     int prepareSock(const char * listenAddr, int port);
     std::string receive();
     std::string getHeader(const std::string& url);
-    std::string parseUrl(std::string url);
-    std::string parseServer(std::string url);
 public:
     Downloader(const std::string& server, bool verbose = false);
     ~Downloader();
-    Response download(std::string url, int maxhops = 3);
+    Response download(std::string url, int maxhops = 5);
+    
+    static std::string parseServer(std::string url);
+    static std::string parseUrl(std::string url);
 };
 
 

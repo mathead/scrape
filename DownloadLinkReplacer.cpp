@@ -21,9 +21,9 @@ string DownloadLinkReplacer::replace(const string &str, const Response& response
     size_t slash = str.rfind('/');
 
     if (dot == string::npos || slash == string::npos || slash > dot || slash <= double_slash + 1)
-    	return "file://" + scraper->enqueueDownload(InternetLinkReplacer::replace(str, response), "", getNextDepth(depth));
+    	return scraper->enqueueDownload(InternetLinkReplacer::replace(str, response), "", getNextDepth(depth));
 
     // guessing file suffix from address came out as ineffective
     string suffix = str.substr(dot);
-    return "file://" + scraper->enqueueDownload(InternetLinkReplacer::replace(str, response), "", getNextDepth(depth));
+    return scraper->enqueueDownload(InternetLinkReplacer::replace(str, response), "", getNextDepth(depth));
 }

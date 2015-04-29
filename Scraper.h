@@ -22,21 +22,27 @@ struct DFile {
 class Scraper {
     std::list<linkFinderPtr> linkFinders;
     std::list<linkFinderPtr> linkFindersDepth0;
+    std::list<std::string> filters;
+    std::list<std::string> antifilters;
     std::list<DFile> toDownload;
     int fileNum, startDepth, lastDepth, lastDepthDownloaded;
+    bool stayOnServer;
     bool verbose;
+    bool missingCreated;
     std::string indexName;
+    std::string startServer;
 
     void updateStatusLine(const std::string& url, int depth);
 public:
-    bool missingCreated;
     std::map<std::string, std::string> downloaded;
     std::string filesPath;
     std::string filesDir;
 
-    Scraper(const std::string& indexName = "index.html", const std::string& filesDir = "files", bool verbose = false);
+    Scraper(const std::list<std::string>& filters, const std::list<std::string>& antifilters, const std::string& indexName = "index.html", 
+            const std::string& filesDir = "files", bool stayOnServer = false, bool verbose = false);
     bool scrape(const std::string& url, int depth, bool first = true);
     std::string enqueueDownload(const std::string& url, const std::string& suffix, int depth);
+    std::string getMissingPage();
 };
 
 
