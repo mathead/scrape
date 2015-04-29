@@ -1,7 +1,3 @@
-//
-// Created by Ja on 4/27/2015.
-//
-
 #include "Downloader.h"
 #include "Response.h"
 #include <cstdio>
@@ -18,6 +14,7 @@ using namespace std;
 
 Downloader::Downloader(const string& server, bool verbose) : verbose(verbose) {
     this->server = parseServer(server);
+    // wanted to do a keep-alive connection, but there were too many problems
     // sock = prepareSock(server.c_str(), 80);
 }
 
@@ -63,7 +60,8 @@ string Downloader::receive() {
         int l = recv(sock, buffer, sizeof(buffer), 0);
         // l < 0 -> error, l == 0 -> finished
         if (l <= 0) return ret;
-        ret.append(buffer, l);
+        // this will append the data even with /0 bytes (which can be in binary data)
+        ret.append(buffer, (unsigned int) l);
 
         // if EOF -> return
         // if ((unsigned int) l < sizeof(buffer)) return ret;
@@ -83,6 +81,7 @@ string Downloader::parseUrl(string url) {
     if (url.find('/') == string::npos)
         url += '/';
 
+    // trim the server part of url
     url = url.substr(url.find('/'));
 
 	return url;
@@ -90,9 +89,11 @@ string Downloader::parseUrl(string url) {
 
 string Downloader::parseServer(string url) {
     size_t found;
+    // trim the http://
     if ((found = url.find("://")) != string::npos)
         url = url.substr(found + 3);
 
+    // get only the server part (before '/')
     if ((found = url.find('/')) != string::npos)
         url = url.substr(0, found);
 
@@ -104,6 +105,7 @@ Response Downloader::download(string url, int maxhops) {
 	if (sock == -1) {
         if (verbose)
             cout << "socket error" << endl;
+        // In case of error, we return empty Response with status -1
 		return Response("", server, verbose);
 	}
 
@@ -114,17 +116,18 @@ Response Downloader::download(string url, int maxhops) {
         // cout << header << "------------------" << endl << endl;
     }
 
+    // send the request and receive the response
     send(sock, header.c_str(), header.length(), 0);
     Response r(receive(), server, verbose);
     if (verbose)
         cout << ">>> Received " << url << " status: " << r.status << endl;
-    
-    close(sock);
+
+    close(sock); // for some reason, the closing sometimes takes up to about 5 seconds
 
     // handle MOVED responses
     if (r.moved && maxhops > 0) {
         string newServer = parseServer(r.headers["Location"]);
-        if (newServer != "_")
+        if (newServer != "_") // some sites use _ to redirect to https on the same server
             server = newServer;
         return download(r.headers["Location"], maxhops - 1);
     }
