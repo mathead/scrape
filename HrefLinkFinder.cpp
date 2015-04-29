@@ -1,9 +1,4 @@
-//
-// Created by Ja on 4/27/2015.
-//
-
 #include "HrefLinkFinder.h"
-#include <iostream>
 using namespace std;
 
 HrefLinkFinder::HrefLinkFinder(LinkReplacer *linkReplacer) : LinkFinder(linkReplacer) { }

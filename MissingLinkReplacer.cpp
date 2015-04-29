@@ -1,7 +1,3 @@
-//
-// Created by Ja on 4/27/2015.
-//
-
 #include "MissingLinkReplacer.h"
 #include "Scraper.h"
 #include <fstream>
@@ -12,6 +8,8 @@ MissingLinkReplacer::MissingLinkReplacer(Scraper *scraper) : InternetLinkReplace
 
 string MissingLinkReplacer::replace(const string &str, const Response& response, int depth) {
     string link = InternetLinkReplacer::replace(str, response);
+
+    // if the link isn't already downloaded, return the missing page
     if (scraper->downloaded.count(link))
         return "file://" + scraper->downloaded[link];
 

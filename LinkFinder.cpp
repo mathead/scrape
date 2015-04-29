@@ -1,7 +1,3 @@
-//
-// Created by Ja on 4/27/2015.
-//
-
 #include "LinkFinder.h"
 #include <iostream>
 using namespace std;
@@ -14,11 +10,14 @@ bool LinkFinder::findTagAttr(const std::string &tag, const std::string &attribut
                              size_t &start, size_t &end, list<string> mandatory_attributes) {
     while (true) {
         size_t tagstart, tagend, attrstart;
+
+        // are there any more tags?
         if ((tagstart = response.content.find(tag, startpos)) == string::npos)
             return false;
         if ((tagend = response.content.find(">", tagstart)) == string::npos)
             return false;
 
+        // does the tag have the needed attribute?
         attrstart = response.content.find(attribute, tagstart);
         if (attrstart > tagend) {
             startpos = tagend;
@@ -38,9 +37,12 @@ bool LinkFinder::findTagAttr(const std::string &tag, const std::string &attribut
         if (missing)
         	continue;
 
+        // set the start and end out parameters to the attribute value (between the quotation marks)
         start = attrstart + attribute.length();
         end = response.content.find('\"', start);
         startpos = tagend;
+
+        // if there are any tags left, return true
         return true;
     }
 }

@@ -8,6 +8,9 @@
 #include "LinkFinder.h"
 #include "LinkReplacer.h"
 
+/**
+ * LinkFinder that searches for the src attribute in the "script" tags
+ */
 class JSLinkFinder : public LinkFinder {
 public:
     JSLinkFinder(LinkReplacer *linkReplacer);

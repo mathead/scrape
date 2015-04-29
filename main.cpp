@@ -12,6 +12,7 @@ int main(int argc, char **argv) {
     // Response r = d.download("/documents/10552/2e52fe20-e64e-4951-9199-6a35a8496302");
     // r.writeFile("out.pdf");
 
+	// default options
 	bool verbose = false;
 	bool stay_on_server = false;
 	bool images = false;
@@ -26,6 +27,7 @@ int main(int argc, char **argv) {
 
 	opterr = 0;
 
+	// parse the command line options with getopt
 	while ((c = getopt(argc, argv, ":vsF:D:d:f:a:iem")) != -1) {
 		switch (c) {
 			case 'v':
@@ -89,6 +91,7 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
+	// split the filters by commas
 	list<string> filters;
 	list<string> antifilters;
 	istringstream iss(filter);
@@ -100,7 +103,9 @@ int main(int argc, char **argv) {
 		antifilters.push_back(item);
 
 
+	// setup the scraper with collected options
 	Scraper s(filters, antifilters, output_file, output_dir, stay_on_server, verbose, images, extras, missing);
+	// and run it!
 	bool success = s.scrape(argv[argc - 1], depth);
 	cout << endl;
 

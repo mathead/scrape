@@ -21,6 +21,9 @@ Scraper::Scraper(const list<string>& filters, const list<string>& antifilters, c
 					 filters(filters), antifilters(antifilters), fileNum(0), lastDepth(-1), lastDepthDownloaded(0), stayOnServer(stayOnServer),
 					 verbose(verbose), missingCreated(false), filesCreated(false), indexName(indexName), filesDir(filesDir) {
 
+	// Initialize the lists of linkFinders that are applied to every downloaded page
+	// A bit messy here, but the pointers have to be moved to unique_ptr and there is a lot of config options
+
 	// LinkReplacers for standard scraping according to arguments
     if (downloadImages)
 		linkFinders.push_back(linkFinderPtr(move(new ImageLinkFinder(new DownloadLinkReplacer(this, false)))));
@@ -67,10 +70,12 @@ Scraper::Scraper(const list<string>& filters, const list<string>& antifilters, c
 }
 
 bool Scraper::scrape(const string& url, int depth, bool first) {
+	// download the page
     Downloader downloader(url, verbose);
     Response page = downloader.download(url);
 
 	if (first) {
+		// some initialization if this is the main index.html page
 		if (!page.ok) {
 			cerr << "Couldn't download " << url << endl 
 				 << "Server " << page.server << " responded with status " << page.status;
@@ -88,8 +93,11 @@ bool Scraper::scrape(const string& url, int depth, bool first) {
 
 	if (verbose)
 		cout << ">>> Downloaded" << endl;
+	// update that nifty loading bar
 	updateStatusLine(url, depth);
 
+	// Let all the LinkFinders do their thing
+	// if this is the last depth, it gets handled differently
 	if (depth > 0)
 	    for (auto &linkFinder : linkFinders)
 	        linkFinder->find(page, depth);
@@ -100,9 +108,11 @@ bool Scraper::scrape(const string& url, int depth, bool first) {
 	if (verbose)
 		cout << ">>> Replaced" << endl << endl;
 
+	// save the modified page
     page.writeFile(downloaded[url]);
 
 
+	// if there is something in the queue, scrape it next
     if(toDownload.size()) {
         DFile next = toDownload.front();
         toDownload.pop_front();
@@ -114,7 +124,9 @@ bool Scraper::scrape(const string& url, int depth, bool first) {
 }
 
 string Scraper::enqueueDownload(const string& url, const string& suffix, int depth) {
+	// didn't we download this already?
     if (!downloaded.count(url)) {
+		// run it through the filters
         if (stayOnServer && Downloader::parseServer(url).find(startServer) == string::npos) {
         	if (verbose)
 				cout << ">>> Skipping " << url << endl;
@@ -138,7 +150,9 @@ string Scraper::enqueueDownload(const string& url, const string& suffix, int dep
 		if (verbose)
 			cout << ">>> Enqueued " << url << " with suffix " << suffix << " depth " << depth << endl;
 
+		// enqueue it if it got here
         toDownload.push_back(DFile(url, depth));
+		// and save the reference to the file on disk
         downloaded[url] = getFilesPath() + "/file" + std::to_string(fileNum++) + suffix;
     }
 
@@ -148,6 +162,7 @@ string Scraper::enqueueDownload(const string& url, const string& suffix, int dep
 void Scraper::updateStatusLine(const string& url, int depth) {
 	lastDepthDownloaded++;
 
+	// get the current depth (it's not always sorted)
 	if (depth == 0) {
 		for (auto &f : toDownload) {
 			if (f.depth > depth)
@@ -155,19 +170,23 @@ void Scraper::updateStatusLine(const string& url, int depth) {
 		}
 	}
 
+	// count the files in the current depth
 	int count = 0;
 	for (auto &f : toDownload) {
 		if (f.depth >= depth)
 			count++;
 	}
 
+	// is this the next phase?
 	if (depth != lastDepth) {
 		cout << endl;
 		lastDepth = depth;
 		lastDepthDownloaded = 0;
 	}
 
+	// delete the last and print out the updated status line
 	cout << "\rDepth: " << startDepth - depth << " - [";
+	// the download bar
 	int total = max(count + lastDepthDownloaded, 1);
 	for (int i = 0; i < 20; i++) {
 		if (lastDepthDownloaded * 20 / total > i)
@@ -175,18 +194,23 @@ void Scraper::updateStatusLine(const string& url, int depth) {
 		else
 			cout << ' ';
 	}
+	// also in percent
 	cout << "] " << lastDepthDownloaded * 100 / total << "% - " << 
             lastDepthDownloaded << '/' << total << " files downloaded - Downloading ";
+
+	// print the page we are currently downloading (max 50 chars)
     if (url.length() < 50) {
     	cout << url;
     	for (int i = url.length(); i < 50; i++)
     		cout << ' ';
     } else 
     	cout << url.substr(0, 46) << "...";
-    cout << std::flush;
+
+    cout << std::flush; // we need to flush it, because we didn't have endl anywhere
 }
 
 string Scraper::getMissingPage() {
+	// create the missing page only if it is ever needed
 	if (!missingCreated) {
         ofstream file(getFilesPath() + "/missing.html");
         file << "Unfortunately, this page isn't downloaded :(";
@@ -199,6 +223,7 @@ string Scraper::getMissingPage() {
 }
 
 string Scraper::getFilesPath() {
+	// create the files directory only if it is ever needed
 	if (!filesCreated) {
 		// create files directory
 		struct stat st = {0};
@@ -216,7 +241,7 @@ string Scraper::getFilesPath() {
 string Scraper::getAbsPath(string file) {
 	char *abspath = realpath(file.c_str(), NULL);
 	string ret = abspath;
-	free(abspath);
+	free(abspath); // it's allocated in the realpath
 
 	return ret;
 }

@@ -1,7 +1,3 @@
-//
-// Created by Ja on 4/27/2015.
-//
-
 #ifndef SEMESTRALKA_HREFLINKFINDER_H
 #define SEMESTRALKA_HREFLINKFINDER_H
 
@@ -9,6 +5,9 @@
 #include "LinkFinder.h"
 #include "LinkReplacer.h"
 
+/**
+ * Main LinkFinder for finding links to other web pages in the "a" tag
+ */
 class HrefLinkFinder : public LinkFinder {
 public:
     HrefLinkFinder(LinkReplacer *linkReplacer);

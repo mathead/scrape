@@ -1,7 +1,3 @@
-//
-// Created by Ja on 4/27/2015.
-//
-
 #include "Response.h"
 #include <sstream>
 #include <fstream>
@@ -48,10 +44,10 @@ Response::Response(const string& response, const string& server, bool verbose) :
     }
 
     // content
-    while (getline(responsess, line))
+    while (getline(responsess, line)) // content can contain \0, se we cant just copy the rest
         content += line + '\n';
     if (content.length())
-        content.pop_back();
+        content.pop_back(); // pop the last \n
 
     // insert utf-8 charset meta tag, as it gets lost in headers
     if (ok && headers.count("Content-Type") && headers["Content-Type"].find("html") != string::npos) {
@@ -60,6 +56,7 @@ Response::Response(const string& response, const string& server, bool verbose) :
             content.insert(pos + 6, "\n<meta http-equiv=\"Content-Type\" content=\"charset=UTF-8\">\n");
     }
 
+    // is this just a moved response?
     if (status >= 300 && status < 400 && headers.count("Location"))
         moved = true;
 
