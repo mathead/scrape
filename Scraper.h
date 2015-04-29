@@ -28,7 +28,7 @@ class Scraper {
     int fileNum, startDepth, lastDepth, lastDepthDownloaded;
     bool stayOnServer;
     bool verbose;
-    bool missingCreated;
+    bool missingCreated, filesCreated;
     std::string indexName;
     std::string startServer;
 
@@ -39,10 +39,13 @@ public:
     std::string filesDir;
 
     Scraper(const std::list<std::string>& filters, const std::list<std::string>& antifilters, const std::string& indexName = "index.html", 
-            const std::string& filesDir = "files", bool stayOnServer = false, bool verbose = false);
+            const std::string& filesDir = "files", bool stayOnServer = false, bool verbose = false, bool downloadImages = false, 
+            bool downloadExtras = false, bool lastMissing = false);
     bool scrape(const std::string& url, int depth, bool first = true);
     std::string enqueueDownload(const std::string& url, const std::string& suffix, int depth);
     std::string getMissingPage();
+    std::string getFilesPath();
+    static std::string getAbsPath(std::string file);
 };
 
 

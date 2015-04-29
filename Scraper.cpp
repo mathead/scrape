@@ -1,7 +1,3 @@
-//
-// Created by Ja on 4/27/2015.
-//
-
 #include "Scraper.h"
 #include "InternetLinkReplacer.h"
 #include "MissingLinkReplacer.h"
@@ -20,36 +16,54 @@
 #include <stdlib.h>
 using namespace std;
 
-Scraper::Scraper(const list<string>& filters, const list<string>& antifilters, const string& indexName, const string& filesDir, bool stayOnServer, bool verbose) : 
+Scraper::Scraper(const list<string>& filters, const list<string>& antifilters, const string& indexName, const string& filesDir,
+	             bool stayOnServer, bool verbose, bool downloadImages, bool downloadExtras, bool lastMissing) : 
 					 filters(filters), antifilters(antifilters), fileNum(0), lastDepth(-1), lastDepthDownloaded(0), stayOnServer(stayOnServer),
-					 verbose(verbose), missingCreated(false), indexName(indexName), filesDir(filesDir) {
+					 verbose(verbose), missingCreated(false), filesCreated(false), indexName(indexName), filesDir(filesDir) {
 
+	// LinkReplacers for standard scraping according to arguments
+    if (downloadImages)
+		linkFinders.push_back(linkFinderPtr(move(new ImageLinkFinder(new DownloadLinkReplacer(this, false)))));
+	else
+		linkFinders.push_back(linkFinderPtr(move(new ImageLinkFinder(new InternetLinkReplacer(this)))));
+
+	if (downloadExtras) {
+		linkFinders.push_back(linkFinderPtr(move(new CSSLinkFinder(new DownloadLinkReplacer(this, false)))));
+		linkFinders.push_back(linkFinderPtr(move(new FaviconLinkFinder(new DownloadLinkReplacer(this, false)))));
+		linkFinders.push_back(linkFinderPtr(move(new JSLinkFinder(new DownloadLinkReplacer(this, false)))));
+	} else {
+		linkFinders.push_back(linkFinderPtr(move(new CSSLinkFinder(new InternetLinkReplacer(this)))));
+		linkFinders.push_back(linkFinderPtr(move(new FaviconLinkFinder(new InternetLinkReplacer(this)))));
+		linkFinders.push_back(linkFinderPtr(move(new JSLinkFinder(new InternetLinkReplacer(this)))));
+	}
+
+	// links should be downloaded last so we can view the page (with images) as soon as possible
 	linkFinders.push_back(linkFinderPtr(move(new HrefLinkFinder(new DownloadLinkReplacer(this, true)))));
-	linkFinders.push_back(linkFinderPtr(move(new ImageLinkFinder(new InternetLinkReplacer(this)))));
-	linkFinders.push_back(linkFinderPtr(move(new CSSLinkFinder(new InternetLinkReplacer(this)))));
-	linkFinders.push_back(linkFinderPtr(move(new FaviconLinkFinder(new InternetLinkReplacer(this)))));
-	linkFinders.push_back(linkFinderPtr(move(new JSLinkFinder(new InternetLinkReplacer(this)))));
-
-	linkFindersDepth0.push_back(linkFinderPtr(move(new HrefLinkFinder(new MissingLinkReplacer(this)))));
-	linkFindersDepth0.push_back(linkFinderPtr(move(new ImageLinkFinder(new InternetLinkReplacer(this)))));
-	linkFindersDepth0.push_back(linkFinderPtr(move(new CSSLinkFinder(new InternetLinkReplacer(this)))));
-	linkFindersDepth0.push_back(linkFinderPtr(move(new FaviconLinkFinder(new InternetLinkReplacer(this)))));
-	linkFindersDepth0.push_back(linkFinderPtr(move(new JSLinkFinder(new InternetLinkReplacer(this)))));
 
 
-	this->antifilters.push_back("mailto:");
+	// LinkReplacers for last depth
+	if (downloadImages)
+		linkFindersDepth0.push_back(linkFinderPtr(move(new ImageLinkFinder(new DownloadLinkReplacer(this, false)))));
+	else
+		linkFindersDepth0.push_back(linkFinderPtr(move(new ImageLinkFinder(new InternetLinkReplacer(this)))));
 
-	// create files directory
-	struct stat st = {0};
+	if (downloadExtras) {
+		linkFindersDepth0.push_back(linkFinderPtr(move(new CSSLinkFinder(new DownloadLinkReplacer(this, false)))));
+		linkFindersDepth0.push_back(linkFinderPtr(move(new FaviconLinkFinder(new DownloadLinkReplacer(this, false)))));
+		linkFindersDepth0.push_back(linkFinderPtr(move(new JSLinkFinder(new DownloadLinkReplacer(this, false)))));
+	} else {
+		linkFindersDepth0.push_back(linkFinderPtr(move(new CSSLinkFinder(new InternetLinkReplacer(this)))));
+		linkFindersDepth0.push_back(linkFinderPtr(move(new FaviconLinkFinder(new InternetLinkReplacer(this)))));
+		linkFindersDepth0.push_back(linkFinderPtr(move(new JSLinkFinder(new InternetLinkReplacer(this)))));
+	}
 
-	if (stat(filesDir.c_str(), &st) == -1)
-		mkdir(filesDir.c_str(), 0700);
+	if (lastMissing)
+		linkFindersDepth0.push_back(linkFinderPtr(move(new HrefLinkFinder(new MissingLinkReplacer(this)))));
+	else
+		linkFindersDepth0.push_back(linkFinderPtr(move(new HrefLinkFinder(new InternetLinkReplacer(this)))));
 
-	// get absolute path
-	char *abspath = realpath(filesDir.c_str(), NULL);
-	filesPath = abspath;
-	filesPath = filesPath;
-	free(abspath);
+
+	this->antifilters.push_back("mailto:"); // don't try to download mailto links
 }
 
 bool Scraper::scrape(const string& url, int depth, bool first) {
@@ -67,8 +81,9 @@ bool Scraper::scrape(const string& url, int depth, bool first) {
 		startServer = page.server;
 		lastDepth = startDepth;
 		InternetLinkReplacer i(this);
-		downloaded[i.replace(url, page)] = filesPath.substr(0, filesPath.length() - filesDir.length() - 1) + indexName;
-		downloaded[url] = indexName;
+		string abspath = getAbsPath(".") + "/" + indexName;
+		downloaded[i.replace(url, page)] = abspath;
+		downloaded[url] = abspath;
 	}
 
 	if (verbose)
@@ -124,7 +139,7 @@ string Scraper::enqueueDownload(const string& url, const string& suffix, int dep
 			cout << ">>> Enqueued " << url << " with suffix " << suffix << " depth " << depth << endl;
 
         toDownload.push_back(DFile(url, depth));
-        downloaded[url] = filesPath + "/file" + std::to_string(fileNum++) + suffix;
+        downloaded[url] = getFilesPath() + "/file" + std::to_string(fileNum++) + suffix;
     }
 
     return "file://" + downloaded[url];
@@ -173,12 +188,35 @@ void Scraper::updateStatusLine(const string& url, int depth) {
 
 string Scraper::getMissingPage() {
 	if (!missingCreated) {
-        ofstream file(filesPath + "/missing.html");
+        ofstream file(getFilesPath() + "/missing.html");
         file << "Unfortunately, this page isn't downloaded :(";
         file.close();
 
         missingCreated = true;
     }
 
-    return "file://" + filesPath + "/missing.html";
+    return "file://" + getFilesPath() + "/missing.html";
+}
+
+string Scraper::getFilesPath() {
+	if (!filesCreated) {
+		// create files directory
+		struct stat st = {0};
+
+		if (stat(filesDir.c_str(), &st) == -1)
+			mkdir(filesDir.c_str(), 0700);
+
+		filesPath = getAbsPath(filesDir);
+		filesCreated = true;
+	}
+
+	return filesPath;
+}
+
+string Scraper::getAbsPath(string file) {
+	char *abspath = realpath(file.c_str(), NULL);
+	string ret = abspath;
+	free(abspath);
+
+	return ret;
 }

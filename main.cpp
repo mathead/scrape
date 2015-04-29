@@ -14,6 +14,9 @@ int main(int argc, char **argv) {
 
 	bool verbose = false;
 	bool stay_on_server = false;
+	bool images = false;
+	bool extras = false;
+	bool missing = false;
 	string output_file = "index.html";
 	string output_dir = "files";
 	string filter = "";
@@ -23,7 +26,7 @@ int main(int argc, char **argv) {
 
 	opterr = 0;
 
-	while ((c = getopt(argc, argv, ":vsF:D:d:f:a:")) != -1) {
+	while ((c = getopt(argc, argv, ":vsF:D:d:f:a:iem")) != -1) {
 		switch (c) {
 			case 'v':
 				verbose = true;
@@ -58,6 +61,15 @@ int main(int argc, char **argv) {
 			case 'a':
 				antifilter = optarg;
 				break;
+			case 'i':
+				images = true;
+				break;
+			case 'e':
+				extras = true;
+				break;
+			case 'm':
+				missing = true;
+				break;
 			case '?':
 				cerr << "Unknown option '-" << (char) optopt << "'." << endl;
 				return 1;
@@ -88,7 +100,7 @@ int main(int argc, char **argv) {
 		antifilters.push_back(item);
 
 
-	Scraper s(filters, antifilters, output_file, output_dir, stay_on_server, verbose);
+	Scraper s(filters, antifilters, output_file, output_dir, stay_on_server, verbose, images, extras, missing);
 	bool success = s.scrape(argv[argc - 1], depth);
 	cout << endl;
 
