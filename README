@@ -1,0 +1,9 @@
+scrape - a tool for downloading web pages
+
+scrape can download web pages to a certain depth and save them to your hard drive.
+It can handle images, js and css files, it supports custom filtering and different strategies when the last depth is reached.
+
+You can view the man page with man ./scrape
+
+License: BSD
+Author: Matej Hlavacek
