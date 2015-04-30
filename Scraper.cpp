@@ -22,7 +22,7 @@ Scraper::Scraper(const list<string>& filters, const list<string>& antifilters, c
 					 verbose(verbose), missingCreated(false), filesCreated(false), indexName(indexName), filesDir(filesDir) {
 
 	// Initialize the lists of linkFinders that are applied to every downloaded page
-	// A bit messy here, but the pointers have to be moved to unique_ptr and there is a lot of config options
+	// A bit messy here, but the pointers have to be moved to unique_ptr and there is a lot of config options...
 
 	// LinkReplacers for standard scraping according to arguments
     if (downloadImages)
@@ -70,6 +70,10 @@ Scraper::Scraper(const list<string>& filters, const list<string>& antifilters, c
 }
 
 bool Scraper::scrape(const string& url, int depth, bool first) {
+	// update that nifty loading bar
+	if (!first)
+		updateStatusLine(url, depth);
+
 	// download the page
     Downloader downloader(url, verbose);
     Response page = downloader.download(url);
@@ -89,12 +93,11 @@ bool Scraper::scrape(const string& url, int depth, bool first) {
 		string abspath = getAbsPath(".") + "/" + indexName;
 		downloaded[i.replace(url, page)] = abspath;
 		downloaded[url] = abspath;
+		updateStatusLine(url, depth);
 	}
 
 	if (verbose)
 		cout << ">>> Downloaded" << endl;
-	// update that nifty loading bar
-	updateStatusLine(url, depth);
 
 	// Let all the LinkFinders do their thing
 	// if this is the last depth, it gets handled differently

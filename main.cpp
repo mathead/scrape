@@ -7,6 +7,11 @@
 
 using namespace std;
 
+void usage() {
+	// help message
+	cout << "Usage: scrape [-F <path>] [-D <path>] [-d <depth>] [-f <filters>] [-a <antifilters>] [-ieshv] <URL>" << endl;
+}
+
 int main(int argc, char **argv) {
     // Downloader d("cvut.cz", true);
     // Response r = d.download("/documents/10552/2e52fe20-e64e-4951-9199-6a35a8496302");
@@ -28,7 +33,7 @@ int main(int argc, char **argv) {
 	opterr = 0;
 
 	// parse the command line options with getopt
-	while ((c = getopt(argc, argv, ":vsF:D:d:f:a:iem")) != -1) {
+	while ((c = getopt(argc, argv, ":vsF:D:d:f:a:iemh")) != -1) {
 		switch (c) {
 			case 'v':
 				verbose = true;
@@ -72,22 +77,31 @@ int main(int argc, char **argv) {
 			case 'm':
 				missing = true;
 				break;
+			case 'h':
+				cout << "scrape - tool for downloading web pages" << endl;
+				usage();
+				return 0;
+				break;
 			case '?':
 				cerr << "Unknown option '-" << (char) optopt << "'." << endl;
+				usage();
 				return 1;
 			case ':':
 				cerr << "Option '" << (char) optopt << "' requires an argument." << endl;
+				usage();
 				return 1;
 		}
 	}
 
 	if (optind >= argc) {
 		cerr << "No URL to scrape." << endl;
+		usage();
 		return 1;
 	}
 
 	if (optind < argc - 1) {
 		cerr << "Too many arguments." << endl;
+		usage();
 		return 1;
 	}
 

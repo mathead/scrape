@@ -1,7 +1,7 @@
 .\" Manpage for scrape.
 .TH man 7 "30 April 2014" "0.1" "scrape man page"
 .SH NAME
-scrape \- download web pages
+scrape \- tool for downloading web pages
 .SH SYNOPSIS
 scrape [-F <path>] [-D <path>] [-d <depth>] [-f <filters>] [-a <antifilters>] [-i] [-e] [-s] [-h] [-v] <URL>
 .SH DESCRIPTION
@@ -29,6 +29,28 @@ Download web pages that are hosted only on the original server. This limits the 
 Print a brief help message
 .IP -v
 Turn on verbose output with more info about what is happening.
+.SH EXAMPLES
+.PP
+To download just the front page of cvut.cz, with no additional files:
+.PP
+.RS
+.nf
+scrape fit.cvut.cz
+.RE
+.PP
+To download it to depth 3, while writing the additional web pages to "files" directory:
+.PP
+.RS
+scrape -d 3 fit.cvut.cz
+.RE
+.PP
+To download it to depth 3, while staying only on the cvut.cz server, discarding any links containing "usermap" or "documents" in their URL.
+The main page is saved as "cvut.html" and the additional files are downloaded to "cvut_files" directory.
+.PP
+.RS
+.PP
+scrape -d 3 -si -a usermap,documents -F cvut.html -D cvut_files fit.cvut.cz
+.RE
 .SH SEE ALSO
 wget(1)
 .SH BUGS
