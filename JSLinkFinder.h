@@ -1,7 +1,3 @@
-//
-// Created by Ja on 4/27/2015.
-//
-
 #ifndef SEMESTRALKA_JSLINKFINDER_H
 #define SEMESTRALKA_JSLINKFINDER_H
 

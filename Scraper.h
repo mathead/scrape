@@ -10,7 +10,7 @@
 typedef std::unique_ptr<LinkFinder> linkFinderPtr;
 
 /**
- * Structure for queuing what to download next and to what depth
+ * Struct for queuing what to download next and to what depth
  */
 struct DFile {
     std::string url;
