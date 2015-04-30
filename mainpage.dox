@@ -1,8 +1,8 @@
 /** \mainpage
  *  \section Introduction
- *  %Scraper is a command line tool to download web pages to a certain depth.
+ *  %Scrape is a command line tool to download web pages to a certain depth.
  *
- *  %Scraper can handle images, js and css files, it supports custom filtering and different strategies when the last depth is reached.
+ *  %Scrape can handle images, js and css files, it supports custom filtering and different strategies when the last depth is reached.
  *
  *  Usage is documented in the man page, here you'll find only source code documentation.
  */

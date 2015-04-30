@@ -1,0 +1,37 @@
+.\" Manpage for scrape.
+.TH man 7 "30 April 2014" "0.1" "scrape man page"
+.SH NAME
+scrape \- download web pages
+.SH SYNOPSIS
+scrape [-F <path>] [-D <path>] [-d <depth>] [-f <filters>] [-a <antifilters>] [-i] [-e] [-s] [-h] [-v] <URL>
+.SH DESCRIPTION
+scrape can download web pages to a certain depth and save them to your hard drive.
+It can handle images, js and css files, it supports custom filtering and different strategies when the last depth is reached.
+.SH OPTIONS
+.IP "-F <path>"
+Output file for the main page (default index.html).
+.IP "-D <path>"
+Output directory for additional files downloaded (default files/).
+.IP "-d <depth>"
+Specify the depth to which the downloading should be done (default 0).
+.IP "-f <filters>"
+Comma separated list of strings that have to be found in a URL of a page for it to be downloaded.
+.IP "-a <antifilters>"
+Comma separated list of strings that can't be found in a URL of a page for it to be downloaded.
+.IP -i
+Download images instead of linking them to the original location on the internet.
+.IP -e
+Download extras (js, css, favicons) instead of linking them to the original location on the internet.
+This often breaks the site, so it is not recommended at more complex web pages.
+.IP -s
+Download web pages that are hosted only on the original server. This limits the recursive download to get too much out of hand.
+.IP -h
+Print a brief help message
+.IP -v
+Turn on verbose output with more info about what is happening.
+.SH SEE ALSO
+wget(1)
+.SH BUGS
+Probably many, but no known.
+.SH AUTHOR
+Matej Hlavacek (https://github.com/PrehistoricTeam)

@@ -8,7 +8,7 @@
 #---------------------------------------------------------------------------
 
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Scraper"
+PROJECT_NAME           = "Scrape"
 PROJECT_NUMBER         = 0.1
 PROJECT_BRIEF          = "A command line tool to download web pages"
 OUTPUT_DIRECTORY       = doc
