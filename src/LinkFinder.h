@@ -24,7 +24,7 @@ protected:
      * @return false if there aren't any tags left
      */
     bool findTagAttr(const std::string& tag, const std::string& attribute, Response& response, size_t& startpos,
-                     size_t& start, size_t& end, std::list<std::string> mandatory_attributes = {});
+                     size_t& start, size_t& end, std::list<std::string> mandatory_attributes = std::list<std::string>());
 public:
     /**
      * @param linkReplacer calls the LinkReplacers replace method on the found links
