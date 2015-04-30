@@ -1,7 +1,0 @@
-cmake_minimum_required(VERSION 3.1)
-project(semestralka)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
-set(SOURCE_FILES main.cpp)
-add_executable(semestralka ${SOURCE_FILES} Downloader.cpp Downloader.h Response.cpp Response.h Scraper.cpp Scraper.h LinkFinder.cpp LinkFinder.h HrefLinkFinder.cpp HrefLinkFinder.h LinkReplacer.h InternetLinkReplacer.cpp InternetLinkReplacer.h ImageLinkFinder.cpp ImageLinkFinder.h DownloadLinkReplacer.cpp DownloadLinkReplacer.h FaviconLinkFinder.cpp FaviconLinkFinder.h CSSLinkFinder.cpp CSSLinkFinder.h JSLinkFinder.cpp JSLinkFinder.h LinkReplacer.cpp MissingLinkReplacer.cpp MissingLinkReplacer.h)
