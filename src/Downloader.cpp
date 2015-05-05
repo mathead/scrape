@@ -69,7 +69,7 @@ string Downloader::receive() {
 }
 
 string Downloader::getHeader(const string& url) {
-    return "GET " + url + " HTTP/1.0\n" + additionalHeaders + "\n";
+    return "GET http://" + server + url + " HTTP/1.0\n" + "Host: " + server + "\n" + additionalHeaders + "\n";
 }
 
 string Downloader::parseUrl(string url) {
