@@ -24,7 +24,7 @@ class Downloader {
     std::string receive();
 
     /// Get header for HTTP GET request
-    std::string getHeader(const std::string& url);
+    std::string getHeader(const std::string& url) const;
 public:
     /**
      * @param server server URL, the server part gets parsed, so it can be a full link to a page

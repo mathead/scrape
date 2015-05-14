@@ -11,7 +11,7 @@ class DownloadLinkReplacer : public InternetLinkReplacer {
 	bool propagateDepth;
 
     /// Get 1 lower depth or 0 according to propagateDepth
-	int getNextDepth(int current);
+	int getNextDepth(int current) const;
 public:
     /**
      * @param propagateDepth sets if the found links should be searched too or just downloaded

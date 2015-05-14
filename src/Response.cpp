@@ -63,7 +63,7 @@ Response::Response(const string& response, const string& server, bool verbose) :
     fail = false;
 }
 
-void Response::writeFile(const string& path) {
+void Response::writeFile(const string& path) const {
     ofstream file(path, ios::binary);
     // file.write(content.c_str(), content.length());
     file << content;

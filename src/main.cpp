@@ -13,10 +13,6 @@ void usage() {
 }
 
 int main(int argc, char **argv) {
-    // Downloader d("cvut.cz", true);
-    // Response r = d.download("/documents/10552/2e52fe20-e64e-4951-9199-6a35a8496302");
-    // r.writeFile("out.pdf");
-
 	// default options
 	bool verbose = false;
 	bool stay_on_server = false;

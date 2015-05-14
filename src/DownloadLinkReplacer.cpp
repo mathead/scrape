@@ -5,7 +5,7 @@ using namespace std;
 DownloadLinkReplacer::DownloadLinkReplacer(Scraper *scraper, bool propagateDepth)
  : InternetLinkReplacer(scraper), propagateDepth(propagateDepth) { }
 
-int DownloadLinkReplacer::getNextDepth(int current) {
+int DownloadLinkReplacer::getNextDepth(int current) const {
 	return propagateDepth * (current - 1);
 }
 

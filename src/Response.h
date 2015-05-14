@@ -38,7 +38,7 @@ public:
     /**
      * Write the content to a binary file
      */
-    void writeFile(const std::string& path);
+    void writeFile(const std::string& path) const;
 };
 
 

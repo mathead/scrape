@@ -68,7 +68,7 @@ string Downloader::receive() {
     }
 }
 
-string Downloader::getHeader(const string& url) {
+string Downloader::getHeader(const string& url) const {
     return "GET http://" + server + url + " HTTP/1.0\n" + "Host: " + server + "\n" + additionalHeaders + "\n";
 }
 

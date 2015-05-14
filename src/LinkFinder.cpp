@@ -7,7 +7,7 @@ LinkFinder::LinkFinder(LinkReplacer* linkReplacer) : linkReplacer(linkReplacer) 
 LinkFinder::~LinkFinder() { delete linkReplacer; }
 
 bool LinkFinder::findTagAttr(const std::string &tag, const std::string &attribute, Response &response, size_t &startpos,
-                             size_t &start, size_t &end, list<string> mandatory_attributes) {
+                             size_t &start, size_t &end, list<string> mandatory_attributes) const {
     while (true) {
         size_t tagstart, tagend, attrstart;
 
