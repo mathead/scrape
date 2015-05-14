@@ -12,6 +12,7 @@
 #include <list>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <stdlib.h>
 using namespace std;
@@ -187,6 +188,10 @@ void Scraper::updateStatusLine(const string& url, int depth) {
 		lastDepthDownloaded = 0;
 	}
 
+	// get the terminal width
+	struct winsize w;
+	ioctl(0, TIOCGWINSZ, &w);
+
 	// delete the last and print out the updated status line
 	cout << "\rDepth: " << startDepth - depth << " - [";
 	// the download bar
@@ -201,13 +206,13 @@ void Scraper::updateStatusLine(const string& url, int depth) {
 	cout << "] " << lastDepthDownloaded * 100 / total << "% - " << 
             lastDepthDownloaded << '/' << total << " files downloaded - Downloading ";
 
-	// print the page we are currently downloading (max 50 chars)
-    if (url.length() < 50) {
+	// print the page we are currently downloading (limit length to terminal width)
+    if (url.length() + 85 < w.ws_col) { // 85 - length of previous output
     	cout << url;
-    	for (int i = url.length(); i < 50; i++)
+    	for (int i = url.length() + 85; i < w.ws_col; i++)
     		cout << ' ';
     } else 
-    	cout << url.substr(0, 46) << "...";
+    	cout << url.substr(0, w.ws_col - 88) << "...";
 
     cout << std::flush; // we need to flush it, because we didn't have endl anywhere
 }
